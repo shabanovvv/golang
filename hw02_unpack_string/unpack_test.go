@@ -2,6 +2,7 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,6 +17,14 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
+		{input: "🙃0", expected: ""},
+		{input: "aaф0b", expected: "aab"},
+		{input: "สวัสดี", expected: "สวัสดี"},
+		{input: "สวัส4ดี", expected: "สวัสสสสดี"},
+		{input: "১২৩", expected: "১২৩"},
+		{input: "১2২৩0", expected: "১১২"},
+		{input: `a2bcde\`, expected: `aabcde\`},
+		{input: "੩4", expected: "੩੩੩੩"},
 		// uncomment if task with asterisk completed
 		// {input: `qwe\4\5`, expected: `qwe45`},
 		// {input: `qwe\45`, expected: `qwe44444`},
@@ -27,6 +36,7 @@ func TestUnpack(t *testing.T) {
 		tc := tc
 		t.Run(tc.input, func(t *testing.T) {
 			result, err := Unpack(tc.input)
+			fmt.Printf("input: %s, expected: %s, myResult: %s\n", tc.input, tc.expected, result)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, result)
 		})
