@@ -1,13 +1,15 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
-	"fmt"
+	"bufio"
 	"io"
-	"regexp"
+	"log"
 	"strings"
+
+	"github.com/mailru/easyjson" //nolint:depguard
 )
 
+//go:generate easyjson -all stats.go
 type User struct {
 	ID       int
 	Name     string
@@ -21,46 +23,34 @@ type User struct {
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
+	scanner := bufio.NewScanner(r)
+	result := DomainStat{}
+	var user User
 
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
+	for scanner.Scan() {
+		if err := easyjson.Unmarshal(scanner.Bytes(), &user); err != nil {
+			return result, err
 		}
-		result[i] = user
-	}
-	return
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
-
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+		if strings.HasSuffix(user.Email, domain) {
+			if b, emailDomain := compareDomain(user.Email, domain); b {
+				result[emailDomain]++
+			}
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
 	return result, nil
+}
+
+func compareDomain(email string, domain string) (bool, string) {
+	index := strings.IndexRune(email, '@')
+	if index != -1 && index < len(email)-1 {
+		emailDomain := strings.ToLower(email[index+1:])
+		if strings.HasSuffix(emailDomain, domain) {
+			return true, emailDomain
+		}
+	}
+	return false, ""
 }
