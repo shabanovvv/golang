@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net"
 	"sync"
@@ -26,7 +27,7 @@ func TestTelnetClient(t *testing.T) {
 			in := &bytes.Buffer{}
 			out := &bytes.Buffer{}
 
-			timeout, err := time.ParseDuration("10s")
+			timeout, err := time.ParseDuration("5s")
 			require.NoError(t, err)
 
 			client := NewTelnetClient(l.Addr().String(), timeout, io.NopCloser(in), out)
@@ -61,5 +62,25 @@ func TestTelnetClient(t *testing.T) {
 		}()
 
 		wg.Wait()
+	})
+}
+
+func TestTelnetClient_ConnectionError(t *testing.T) {
+	t.Run("connection_error", func(t *testing.T) {
+		timeout, err := time.ParseDuration("5s")
+		require.NoError(t, err)
+
+		client := NewTelnetClient("wrong.address:1234", timeout, io.NopCloser(bytes.NewBuffer([]byte{})), io.Discard)
+
+		// Попытка подключения к неправильному адресу
+		err = client.Connect()
+		require.Error(t, err)
+
+		// Проверка, что это ошибка типа *net.OpError
+		var opErr *net.OpError
+		require.True(t, errors.As(err, &opErr))
+
+		// Мы можем также проверить, что операция была `dial` для уверенности
+		require.Equal(t, "dial", opErr.Op)
 	})
 }
