@@ -16,12 +16,17 @@ linters-settings:
           - "!$test"
         allow:
           - $gostd
+          - github.com/shabanovvv/golang/hw12_13_14_15_calendar
+          - github.com/spf13/viper
+          - github.com/jmoiron/sqlx
       Test:
         files:
           - $test
         allow:
           - $gostd
           - github.com/stretchr/testify
+          - github.com/shabanovvv/golang/hw12_13_14_15_calendar
+          - github.com/spf13/viper
 issues:
   exclude-rules:
     - path: _test\.go
@@ -42,7 +47,7 @@ linters:
     - durationcheck
     - errorlint
     - exhaustive
-    - exportloopref
+    - copyloopvar
     - funlen
     - gci
     - gocognit
