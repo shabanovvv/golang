@@ -2,6 +2,67 @@ syntax = "proto3";
 
 package event;
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service EventService {
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+  rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse);
+  rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+
+  rpc GetEventsForDay(GetEventsRequest) returns (GetEventsResponse);
+  rpc GetEventsForWeek(GetEventsRequest) returns (GetEventsResponse);
+  rpc GetEventsForMonth(GetEventsRequest) returns (GetEventsResponse);
+}
+
 message Event {
-    // TODO
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp date_from = 3;
+  google.protobuf.Timestamp date_to = 4;
+  string description = 5;
+  int32 user_id = 6;
+  google.protobuf.Duration notification_time = 7;
+}
+
+message CreateEventRequest {
+  Event event = 1;
+}
+
+message CreateEventResponse {
+  string result = 1;
+}
+
+message GetEventRequest {
+  string event_id = 1;
+}
+
+message GetEventResponse {
+  Event event = 1;
+}
+
+message UpdateEventRequest {
+  Event event = 1;
+}
+
+message UpdateEventResponse {
+  string result = 1;
+}
+
+message DeleteEventRequest {
+  string event_id = 1;
+}
+
+message DeleteEventResponse {
+  string result = 1;
+}
+
+message GetEventsRequest {
+  google.protobuf.Timestamp date_from = 1;
+  int32 user_id = 2;
+}
+
+message GetEventsResponse {
+  repeated Event events = 1;
 }

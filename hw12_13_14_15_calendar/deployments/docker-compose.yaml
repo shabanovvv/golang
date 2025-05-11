@@ -1,1 +1,36 @@
-version: "3"
+services:
+  golang:
+    container_name: golang
+    build: ../build/
+    depends_on:
+      - db
+    networks:
+      - otus-golang
+
+  db:
+    container_name: db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_DB}
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    networks:
+      - otus-golang
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DEFAULT_SERVER=${DATABASE_HOST}
+    ports:
+      - "8080:8080"
+    networks:
+      - otus-golang
+
+networks:
+  otus-golang:
+    driver: bridge

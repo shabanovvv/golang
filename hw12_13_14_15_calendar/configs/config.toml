@@ -1,5 +1,11 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[storage]
+postgres_dsn = "postgres://golang:987654321@db:5432/golang"
+timeout = 3
+
+[server]
+host = "0.0.0.0"
+grpc_port = 8070
+http_port = 8081
